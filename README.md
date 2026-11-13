@@ -101,6 +101,8 @@ python reconstruction_pipeline/run_pipeline.py \
 ```
 
 Open `http://localhost:8080/viewer.html` when reconstruction finishes.
+The bundled Three.js viewer displays the PLY as a point cloud; it does not
+implement full Gaussian splat rendering.
 `python reconstruction_pipeline/run_pipeline.py --test --serve` downloads the
 OpenSplat banana dataset and uses separate test output/workspace directories.
 

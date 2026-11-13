@@ -24,16 +24,14 @@ and does not introduce a new license for the team's work.
 
 ## Publishing
 
-The intended destination is `deshpa70/SpatialBuild`. The outer repository's
+The public destination is `deshpa70/SpatialBuild`. The outer repository's
 `origin` points there; `upstream` identifies the team repository. Nothing is
-published as part of preparation.
+published by the pipeline scripts themselves.
 
-After reviewing the source, create the public repository and push the prepared
-branch from the outer directory:
+The public repository has been created. Push subsequent commits from the outer
+directory:
 
 ```bash
-gh repo create deshpa70/SpatialBuild --public \
-  --description "Voice-guided room editing and Gaussian splat reconstruction"
 git push -u origin main
 ```
 
