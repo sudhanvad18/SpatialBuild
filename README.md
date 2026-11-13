@@ -1,125 +1,80 @@
 # SpatialBuild
 
-SpatialBuild turns a recorded room walkthrough and spoken edit requests into
-edited video frames and a navigable Gaussian splat. The camera direction helps
-identify which object a command such as “paint this wall green” refers to.
+**A narrated room walkthrough, connected to a scene-editing and reconstruction pipeline.**
 
-This repository combines the team project from
-[archakamk/SpatialBuild](https://github.com/archakamk/SpatialBuild) with Sudhanva
-Deshpande's local audio and reconstruction work. See [integration notes](docs/INTEGRATION.md)
-for the source revision and reconciliation decisions.
+SpatialBuild combines speech, computer vision, and 3D reconstruction: extract timed edit requests from a recording, apply them to video frames, and reconstruct the edited room with COLMAP and OpenSplat. A request such as “paint this wall green” is anchored to the frame being viewed when it was spoken.
 
-## Pipeline
+[Setup & run](docs/SETUP.md) · [Demo guide](docs/DEMO.md) · [Source provenance](docs/INTEGRATION.md)
 
-1. **Audio:** convert MOV to MP4/MP3, transcribe with Whisper, and extract timed
-   edit commands using Gemini or a local Qwen model.
-2. **Vision:** Grounding DINO identifies the target; SAM 2 segments and tracks it.
-   The edit engine recolors surfaces, applies textures/images, or removes objects
-   with LaMa inpainting.
-3. **Reconstruction:** COLMAP estimates cameras and OpenSplat trains a Gaussian
-   splat from the edited frames.
-4. **Viewer:** generate a browser viewer, optionally with Tripo3D furniture meshes.
-   ElevenLabs confirmations and Gemini reports are optional vision features.
+[![SpatialBuild architecture and component walkthrough showing the real timestamp-to-frame command adapter.](docs/assets/spatialbuild-preview.gif)](docs/assets/spatialbuild-walkthrough.webm)
 
-## Setup
+**[Watch the 32-second walkthrough](docs/assets/spatialbuild-walkthrough.webm)** · [Pipeline diagram](docs/assets/pipeline.svg) · [Demo notes](docs/DEMO.md)
 
-Use Python 3.10+ and a GPU environment for the full vision/reconstruction pipeline.
-The team configuration targets CUDA or AMD ROCm (PyTorch uses the `cuda` device
-name for both). Local audio also supports Apple MPS and CPU.
+*An architecture/component walkthrough with an executed command-adapter fixture. It explains the pipeline; it is not a recording of end-to-end model inference or reconstruction.*
+
+## What it does
+
+- **Understand a walkthrough:** Whisper transcribes speech; Gemini or a local Qwen model extracts timestamped edit commands.
+- **Edit the right region:** Grounding DINO locates the target, SAM 2 segments and tracks it, and specialized editors recolor, retexture, place images, or remove objects with LaMa.
+- **Reconstruct the result:** COLMAP estimates cameras; OpenSplat trains a Gaussian splat from the edited frames.
+- **Inspect the output:** generate a browser viewer, with optional Tripo3D furniture meshes. The bundled viewer renders the PLY as a **point cloud**, rather than a full Gaussian splat renderer.
+
+## Start here
+
+| Goal | Path |
+| --- | --- |
+| Check the source without model downloads | Run the regression checks below. |
+| Process your own recording | Follow [Setup & run](docs/SETUP.md). Requires model downloads and a suitable GPU environment. |
+| Reconstruct a known dataset | Use reconstruction's `--test` mode after installing COLMAP and OpenSplat; it downloads the banana dataset. |
+
+### Run the regression checks
+
+Use Python 3.10 or later:
 
 ```bash
 git clone https://github.com/sudhanvad18/SpatialBuild.git
 cd SpatialBuild
 python3 -m venv .venv
 source .venv/bin/activate
-# Install the torch/torchvision build appropriate for your GPU first.
-python -m pip install -r requirements.txt
-```
-
-Install system `ffmpeg`. Install SAM 2 and its checkpoint separately:
-
-```bash
-git clone https://github.com/facebookresearch/sam2.git vision_pipeline/sam2
-SAM2_BUILD_CUDA=0 python -m pip install -e vision_pipeline/sam2
-(cd vision_pipeline/sam2/checkpoints && bash download_ckpts.sh)
-```
-
-`SAM2_BUILD_CUDA=0` skips SAM 2's optional CUDA extension. Leave it unset when
-building that extension for a compatible CUDA system. The default checkpoint is
-`vision_pipeline/sam2/checkpoints/sam2.1_hiera_large.pt`; override it with
-`SAM2_CHECKPOINT` if needed.
-
-For reconstruction, install COLMAP and OpenSplat. The optional
-`reconstruction_pipeline/setup.sh` targets Ubuntu and installs system packages,
-Python dependencies, LibTorch, and OpenSplat. Review it before running it on a
-GPU machine. Set `OPENSPLAT_BIN` to an existing build, or use the setup script's
-`.pipeline_config`. The setup script has not been validated across GPU platforms.
-
-API credentials are read from the shell environment. [.env.example](.env.example)
-lists the optional variables; scripts do not load that file automatically.
-
-```bash
-export GEMINI_API_KEY="your-key"       # Gemini audio extraction / reports
-export ELEVENLABS_API_KEY="your-key"   # optional voice confirmations
-export TRIPO3D_API_KEY="your-key"      # optional furniture generation
-```
-
-## Run
-
-Place a MOV recording in the project root. Audio scripts select the first MOV
-in `audio_pipeline/`, then the root; use one recording at a time.
-
-```bash
-# Choose one audio backend (both write audio_pipeline/outputs/).
-python audio_pipeline/extract_audio.py          # Whisper + Gemini
-# python audio_pipeline/extract_audio_local.py  # Whisper + local Qwen, no Gemini key
-```
-
-The local backend preserves the original `Qwen/Qwen2.5-3B-Instruct` command
-extractor and downloads approximately 6 GB of model weights on its first run.
-
-Use the recording's real frame rate consistently for extraction and command
-conversion; the example below uses 30 fps. Replace `walkthrough` with your MOV's
-filename stem.
-
-```bash
-ffmpeg -i walkthrough.MOV -vf "fps=30,scale=720:-2" -start_number 0 \
-  -q:v 2 vision_pipeline/data/frames/frame_%06d.jpg
-
-cd vision_pipeline
-python -m src.adapt_commands \
-  --input ../audio_pipeline/outputs/walkthrough.commands.json \
-  --output commands.json --fps 30
-python -m src.run_pipeline --frames data/frames --commands commands.json \
-  --output data/edited_frames --dry-run
-# Remove --dry-run to load the models and apply edits.
-# Add --voice and/or --report for optional API features.
-cd ..
-
-python reconstruction_pipeline/run_pipeline.py \
-  --frames vision_pipeline/data/edited_frames --iterations 2000 --serve
-```
-
-Open `http://localhost:8080/viewer.html` when reconstruction finishes.
-The bundled Three.js viewer displays the PLY as a point cloud; it does not
-implement full Gaussian splat rendering.
-`python reconstruction_pipeline/run_pipeline.py --test --serve` downloads the
-OpenSplat banana dataset and uses separate test output/workspace directories.
-
-Texture and image-placement commands require the corresponding user-provided
-files under `vision_pipeline/data/textures/`. General furniture `add` commands
-are handled by reconstruction's optional `--commands` option; the vision router
-accepts `recolor`, `retexture`, `remove`, and `place_image`.
-
-## Verification
-
-```bash
+python -m pip install -r reconstruction_pipeline/requirements.txt
 python -m unittest discover -s tests -v
-python -m compileall -q audio_pipeline vision_pipeline/src reconstruction_pipeline
 ```
 
-The regression checks cover reconciliation behavior without downloading models,
-calling paid APIs, or training a splat. Full model inference and GPU training
-require the external dependencies and have not been verified in this checkout.
-The source snapshot does not include the separately hosted frontend, demo media,
-model checkpoints, or a World Labs/Marble integration.
+These eight checks cover checkout-relative paths, OpenSplat discovery, dataset extraction, and isolated test workspaces. They mock downloads and external execution; no API keys or training are required.
+
+## How it works
+
+The handoff between stages is explicit: timestamped audio commands become frame-indexed commands; edited JPEGs become the reconstruction input. Frame extraction and timestamp conversion must use the same frame rate. The current video configuration is 30 fps.
+
+```mermaid
+flowchart LR
+    A[Recorded walkthrough] --> B[Whisper + Gemini or Qwen]
+    A --> C[Extract video frames]
+    B --> D[Timestamp-to-frame adapter]
+    C --> E[Grounding DINO + SAM 2]
+    D --> E
+    E --> F[Apply frame edits]
+    F --> G[COLMAP cameras]
+    G --> H[OpenSplat training]
+    H --> I[PLY + browser point-cloud viewer]
+```
+
+The vision router accepts `recolor`, `retexture`, `remove`, and `place_image`. General furniture `add` requests use reconstruction's optional `--commands` path. Optional ElevenLabs confirmations and Gemini reports are separate from the core editing path.
+
+## Project layout
+
+```text
+audio_pipeline/           Recording conversion, transcription, command extraction
+vision_pipeline/src/     Command adapter, grounding, segmentation, frame editors
+reconstruction_pipeline/ COLMAP orchestration, splat training, viewer generation
+tests/                   Reconciliation regression checks
+docs/                    Setup, demonstration guide, and source provenance
+```
+
+## Verification and scope
+
+The regression suite covers integration behavior with mocked external tools. Full model inference and reconstruction require the model weights and native tools in the [setup guide](docs/SETUP.md). This repository provides pipeline source and tests; model checkpoints and a separately hosted frontend are not bundled. See the [demo guide](docs/DEMO.md) for the artifacts needed to demonstrate a complete run.
+
+## Credits
+
+This public source snapshot combines the team project from [archakamk/SpatialBuild](https://github.com/archakamk/SpatialBuild) with Sudhanva Deshpande's local audio and reconstruction work. It preserves the local Qwen extraction backend and reconciles reconstruction behavior with the team implementation. [Integration notes](docs/INTEGRATION.md) record source revisions and the decisions made when combining them.
