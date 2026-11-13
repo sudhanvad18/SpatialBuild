@@ -24,7 +24,7 @@ and does not introduce a new license for the team's work.
 
 ## Publishing
 
-The public destination is `deshpa70/SpatialBuild`. The outer repository's
+The public destination is `sudhanvad18/SpatialBuild`. The outer repository's
 `origin` points there; `upstream` identifies the team repository. Nothing is
 published by the pipeline scripts themselves.
 

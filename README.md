@@ -28,7 +28,7 @@ The team configuration targets CUDA or AMD ROCm (PyTorch uses the `cuda` device
 name for both). Local audio also supports Apple MPS and CPU.
 
 ```bash
-git clone https://github.com/deshpa70/SpatialBuild.git
+git clone https://github.com/sudhanvad18/SpatialBuild.git
 cd SpatialBuild
 python3 -m venv .venv
 source .venv/bin/activate
