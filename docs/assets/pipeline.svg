@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="348" viewBox="0 0 1200 348" role="img" aria-labelledby="title description">
+  <title id="title">SpatialBuild pipeline</title>
+  <desc id="description">A narrated room recording produces timestamped commands and video frames. Grounding DINO and SAM 2 guide frame edits. COLMAP and OpenSplat reconstruct the edited frames, producing a PLY and browser point-cloud viewer.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0 0 7 3.5 0 7" fill="none" stroke="#667185" stroke-width="1.3"/></marker>
+  </defs>
+  <rect width="1200" height="348" rx="20" fill="#f3f5f8"/>
+  <g font-family="Arial, Helvetica, sans-serif">
+    <text x="36" y="45" font-size="12" font-weight="700" letter-spacing="2" fill="#566176">SPATIALBUILD / FROM WALKTHROUGH TO RECONSTRUCTION</text>
+    <text x="36" y="76" font-size="16" fill="#667185">One recording. Timed requests. A connected editing pipeline.</text>
+    <g fill="none" stroke="#667185" stroke-width="1.5" marker-end="url(#arrow)">
+      <path d="M263 180H295"/>
+      <path d="M555 180H587"/>
+      <path d="M847 180H879"/>
+    </g>
+    <rect x="36" y="108" width="228" height="144" rx="12" fill="#ffffff" stroke="#dce1ea"/>
+    <rect x="296" y="108" width="260" height="144" rx="12" fill="#e8eafd" stroke="#d5d9f4"/>
+    <rect x="588" y="108" width="260" height="144" rx="12" fill="#e4eff1" stroke="#cddfe3"/>
+    <rect x="880" y="108" width="284" height="144" rx="12" fill="#202b43"/>
+    <g font-size="11" font-weight="700" letter-spacing="1.3">
+      <text x="56" y="136" fill="#667185">01 / CAPTURE</text>
+      <text x="316" y="136" fill="#5867ad">02 / INTERPRET</text>
+      <text x="608" y="136" fill="#467b83">03 / EDIT</text>
+      <text x="900" y="136" fill="#b5c4e9">04 / RECONSTRUCT</text>
+    </g>
+    <g font-size="21" font-weight="700" fill="#202b43">
+      <text x="56" y="173">Room walkthrough</text>
+      <text x="316" y="173">Timed commands</text>
+      <text x="608" y="173">Grounded frame edits</text>
+      <text x="900" y="173" fill="#ffffff">COLMAP + OpenSplat</text>
+    </g>
+    <g font-size="13" fill="#667185">
+      <text x="56" y="202">Video frames + spoken requests</text>
+      <text x="316" y="202">Whisper + Gemini or local Qwen</text>
+      <text x="608" y="202">Grounding DINO + SAM 2 + editors</text>
+      <text x="900" y="202" fill="#c0cbe0">Camera estimation + splat training</text>
+      <text x="56" y="225">Input: MOV recording</text>
+      <text x="316" y="225">Handoff: timestamp → frame index</text>
+      <text x="608" y="225">Handoff: edited JPEG frames</text>
+      <text x="900" y="225" fill="#c0cbe0">Output: PLY + point-cloud viewer</text>
+    </g>
+    <path d="M36 280H1164" stroke="#dce1ea"/>
+    <text x="36" y="312" font-size="12" fill="#667185">IMPLEMENTATION MAP — not model output. See the setup guide for dependencies and verification scope.</text>
+  </g>
+</svg>

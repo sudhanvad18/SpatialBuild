@@ -1,0 +1,16 @@
+WEBVTT
+
+00:00:00.000 --> 00:00:05.000
+A room walkthrough and a spoken request become a structured edit pipeline.
+
+00:00:05.000 --> 00:00:11.000
+This is a hand-authored command fixture, not speech-model output.
+
+00:00:11.000 --> 00:00:18.000
+The real adapter maps 15.2 seconds at 30 fps to frame 456 and resolves red to RGB.
+
+00:00:18.000 --> 00:00:25.000
+The source connects audio, vision editing, and reconstruction; model inference is not run here.
+
+00:00:25.000 --> 00:00:32.000
+Reproduce the adapter and regression checks locally; full GPU inference remains separate.
