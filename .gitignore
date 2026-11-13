@@ -1,0 +1,67 @@
+# Original checkout and local comparison files
+/SpatialBuild/
+/.local-backup/
+
+# Python environments and caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+
+# Credentials and machine-local configuration
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+gpu_key*
+id_rsa*
+id_ed25519*
+.aws/
+.ssh/
+.pipeline_config
+
+# Media, trained models, reconstruction artifacts
+*.[mM][oO][vV]
+*.mp4
+*.mp3
+*.wav
+*.ply
+*.splat
+*.glb
+*.pt
+*.pth
+*.safetensors
+*.bin
+*.ckpt
+models/
+audio_pipeline/outputs/*
+!audio_pipeline/outputs/.gitkeep
+vision_pipeline/data/*
+!vision_pipeline/data/frames/
+!vision_pipeline/data/masks/
+!vision_pipeline/data/output/
+!vision_pipeline/data/textures/
+vision_pipeline/data/*/*
+!vision_pipeline/data/*/.gitkeep
+reconstruction_pipeline/output/
+reconstruction_pipeline/colmap_workspace/
+reconstruction_pipeline/test_data/
+reconstruction_pipeline/test_output/
+reconstruction_pipeline/test_workspace/
+reconstruction_pipeline/OpenSplat/
+vision_pipeline/sam2/
+vision_pipeline/_sam2_repo/
+libtorch/
+libtorch.zip
+
+# OS and editors
+.DS_Store
+.vscode/
+.idea/
+.cursor/
+*.swp

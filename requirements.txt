@@ -1,0 +1,15 @@
+# Install the PyTorch build appropriate for your CPU/CUDA/ROCm platform first.
+# SAM 2 and native reconstruction tools are installed separately (see README).
+-r reconstruction_pipeline/requirements.txt
+imageio-ffmpeg
+transformers>=4.42,<5
+accelerate
+torch
+torchvision
+librosa
+soundfile
+google-genai
+elevenlabs
+opencv-python
+simple-lama-inpainting
+pydantic>=2
